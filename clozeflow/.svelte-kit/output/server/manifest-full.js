@@ -6,11 +6,11 @@ function __memo(fn) {
 
 return {
 	appDir: "_app",
-	appPath: "_app",
-	assets: new Set([]),
-	mimeTypes: {},
+	appPath: "ClozeFlow/_app",
+	assets: new Set([".nojekyll","favicon.png"]),
+	mimeTypes: {".png":"image/png"},
 	_: {
-		client: {start:"_app/immutable/entry/start.DDGIarjZ.js",app:"_app/immutable/entry/app.Bg-d9f64.js",imports:["_app/immutable/entry/start.DDGIarjZ.js","_app/immutable/chunks/DkSnChm6.js","_app/immutable/chunks/DXOnRJnB.js","_app/immutable/chunks/DvxwE9WK.js","_app/immutable/chunks/s1rATgWg.js","_app/immutable/entry/app.Bg-d9f64.js","_app/immutable/chunks/s1rATgWg.js","_app/immutable/chunks/DXOnRJnB.js","_app/immutable/chunks/DvxwE9WK.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.QfZ9Cb6s.js",app:"_app/immutable/entry/app.BWxYfY8E.js",imports:["_app/immutable/entry/start.QfZ9Cb6s.js","_app/immutable/chunks/D76gbyXw.js","_app/immutable/chunks/CR0Ep_tM.js","_app/immutable/chunks/B5JE0GZ3.js","_app/immutable/chunks/BLNxhGaS.js","_app/immutable/entry/app.BWxYfY8E.js","_app/immutable/chunks/BLNxhGaS.js","_app/immutable/chunks/CR0Ep_tM.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('./nodes/0.js')),
 			__memo(() => import('./nodes/1.js')),

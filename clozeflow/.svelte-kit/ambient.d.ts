@@ -107,6 +107,7 @@ declare module '$env/static/private' {
 	export const IRBRC: string;
 	export const TERM: string;
 	export const npm_config_cache: string;
+	export const BASE_PATH: string;
 	export const DOTNET_ROOT: string;
 	export const NVS_DIR: string;
 	export const HISTCONTROL: string;
@@ -326,6 +327,7 @@ declare module '$env/dynamic/private' {
 		IRBRC: string;
 		TERM: string;
 		npm_config_cache: string;
+		BASE_PATH: string;
 		DOTNET_ROOT: string;
 		NVS_DIR: string;
 		HISTCONTROL: string;

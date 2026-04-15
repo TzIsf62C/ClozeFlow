@@ -7,6 +7,7 @@
     "imports": [
       "_root.js",
       "_environment.js",
+      "_server.js",
       "_internal.js"
     ]
   },
@@ -14,10 +15,11 @@
     "file": "chunks/client.js",
     "name": "client",
     "imports": [
-      "_exports.js",
+      "_url.js",
       "_utils.js",
       "_index.js",
       "_root.js",
+      "_exports.js",
       "_state.svelte.js"
     ]
   },
@@ -45,7 +47,8 @@
     "name": "internal",
     "imports": [
       "_root.js",
-      "_environment.js"
+      "_environment.js",
+      "_server.js"
     ]
   },
   "_render-context.js": {
@@ -66,6 +69,10 @@
       "_renderer.js"
     ]
   },
+  "_server.js": {
+    "file": "chunks/server.js",
+    "name": "server"
+  },
   "_shared.js": {
     "file": "chunks/shared.js",
     "name": "shared",
@@ -79,9 +86,13 @@
     "name": "state.svelte",
     "imports": [
       "_renderer.js",
-      "_exports.js",
+      "_url.js",
       "_root.js"
     ]
+  },
+  "_url.js": {
+    "file": "chunks/url.js",
+    "name": "url"
   },
   "_utils.js": {
     "file": "chunks/utils.js",
@@ -95,6 +106,7 @@
     "imports": [
       "_shared.js",
       "_render-context.js",
+      "_server.js",
       "_environment.js"
     ]
   },
@@ -117,11 +129,12 @@
     "imports": [
       "_shared.js",
       "_render-context.js",
-      "_environment.js",
-      "_exports.js",
+      "_server.js",
+      "_url.js",
       "_utils.js",
       "_index.js",
-      "_internal.js"
+      "_internal.js",
+      "_exports.js"
     ]
   },
   "src/routes/+layout.svelte": {
@@ -131,14 +144,22 @@
     "isEntry": true,
     "imports": [
       "_renderer.js",
-      "_exports.js",
+      "_url.js",
       "_utils.js",
       "_root.js",
-      "_state.svelte.js"
+      "_exports.js",
+      "_state.svelte.js",
+      "_server.js"
     ],
     "css": [
       "_app/immutable/assets/_layout.BtFuk6ZH.css"
     ]
+  },
+  "src/routes/+layout.ts": {
+    "file": "entries/pages/_layout.ts.js",
+    "name": "entries/pages/_layout.ts",
+    "src": "src/routes/+layout.ts",
+    "isEntry": true
   },
   "src/routes/+page.svelte": {
     "file": "entries/pages/_page.svelte.js",
@@ -146,7 +167,10 @@
     "src": "src/routes/+page.svelte",
     "isEntry": true,
     "imports": [
-      "_client.js"
+      "_client.js",
+      "_server.js",
+      "_url.js",
+      "_root.js"
     ]
   },
   "src/routes/activity/+page.svelte": {
@@ -156,6 +180,9 @@
     "isEntry": true,
     "imports": [
       "_renderer.js",
+      "_server.js",
+      "_url.js",
+      "_root.js",
       "_db.js",
       "_index.js"
     ]

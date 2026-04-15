@@ -1,4 +1,8 @@
-import { ab as head, a as store_get, e as ensure_array_like, d as escape_html, b as attr, c as attr_class, f as stringify, u as unsubscribe_stores } from "../../../chunks/renderer.js";
+import { h as head, a as store_get, e as ensure_array_like, d as escape_html, b as attr, c as attr_class, f as stringify, u as unsubscribe_stores } from "../../../chunks/renderer.js";
+import { b as base } from "../../../chunks/server.js";
+import "../../../chunks/url.js";
+import "@sveltejs/kit/internal/server";
+import "../../../chunks/root.js";
 import { d as db, c as computeSentenceHash, D as DEFAULT_GRAM_CATS } from "../../../chunks/db.js";
 import { d as derived, g as get, w as writable } from "../../../chunks/index.js";
 function shuffle(arr) {
@@ -313,7 +317,7 @@ function _page($$renderer, $$props) {
       $$renderer2.push(`</div> `);
       if (store_get($$store_subs ??= {}, "$sessionStore", sessionStore).errorMsg) {
         $$renderer2.push("<!--[0-->");
-        $$renderer2.push(`<div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">${escape_html(store_get($$store_subs ??= {}, "$sessionStore", sessionStore).errorMsg)} <a href="/manage" class="ml-1 font-semibold underline">Add words →</a></div>`);
+        $$renderer2.push(`<div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">${escape_html(store_get($$store_subs ??= {}, "$sessionStore", sessionStore).errorMsg)} <a${attr("href", `${stringify(base)}/manage`)} class="ml-1 font-semibold underline">Add words →</a></div>`);
       } else {
         $$renderer2.push("<!--[-1-->");
       }

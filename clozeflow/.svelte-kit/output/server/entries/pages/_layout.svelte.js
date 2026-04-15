@@ -1,11 +1,13 @@
 import { g as getContext, s as slot, e as ensure_array_like, a as store_get, b as attr, c as attr_class, d as escape_html, u as unsubscribe_stores, f as stringify } from "../../chunks/renderer.js";
 import "clsx";
 import "@sveltejs/kit/internal";
-import "../../chunks/exports.js";
+import "../../chunks/url.js";
 import "../../chunks/utils.js";
 import "@sveltejs/kit/internal/server";
 import "../../chunks/root.js";
+import "../../chunks/exports.js";
 import "../../chunks/state.svelte.js";
+import { b as base } from "../../chunks/server.js";
 const getStores = () => {
   const stores$1 = getContext("__svelte__");
   return {
@@ -31,8 +33,8 @@ function _layout($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
     var $$store_subs;
     const navItems = [
-      { href: "/activity", label: "Activity", icon: "📝" },
-      { href: "/manage", label: "Manage", icon: "⚙️" }
+      { href: `${base}/activity`, label: "Activity", icon: "📝" },
+      { href: `${base}/manage`, label: "Manage", icon: "⚙️" }
     ];
     $$renderer2.push(`<div class="flex min-h-screen flex-col bg-gray-50"><main class="flex-1 pb-20"><!--[-->`);
     slot($$renderer2, $$props, "default", {});

@@ -1,10 +1,11 @@
 <script lang="ts">
   import '../app.css';
   import { page } from '$app/stores';
+  import { base } from '$app/paths';
 
   const navItems = [
-    { href: '/activity', label: 'Activity', icon: '📝' },
-    { href: '/manage', label: 'Manage', icon: '⚙️' }
+    { href: `${base}/activity`, label: 'Activity', icon: '📝' },
+    { href: `${base}/manage`, label: 'Manage', icon: '⚙️' }
   ];
 </script>
 

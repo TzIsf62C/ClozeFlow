@@ -1,5 +1,6 @@
 import { r as root } from "./root.js";
 import "./environment.js";
+import "./server.js";
 let public_env = {};
 function set_private_env(environment) {
 }
@@ -102,7 +103,7 @@ const options = {
 		<div class="error">
 			<span class="status">` + status + '</span>\n			<div class="message">\n				<h1>' + message + "</h1>\n			</div>\n		</div>\n	</body>\n</html>\n"
   },
-  version_hash: "1dj2z0f"
+  version_hash: "1k9e1iz"
 };
 async function get_hooks() {
   let handle;

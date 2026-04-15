@@ -1,4 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  goto('/activity', { replaceState: true });
+  import { base } from '$app/paths';
+  goto(`${base}/activity`, { replaceState: true });
 </script>

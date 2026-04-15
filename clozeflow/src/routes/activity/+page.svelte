@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { fly, fade } from 'svelte/transition';
+  import { base } from '$app/paths';
   import { db, DEFAULT_GRAM_CATS } from '$lib/db';
   import { sessionStore, allBlanksFilled } from '$lib/stores/session';
   import type { SessionSentence } from '$lib/stores/session';
@@ -89,7 +90,7 @@
           class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {$sessionStore.errorMsg}
-          <a href="/manage" class="ml-1 font-semibold underline">Add words →</a>
+          <a href="{base}/manage" class="ml-1 font-semibold underline">Add words →</a>
         </div>
       {/if}
 
