@@ -1,5 +1,12 @@
 {
-	"/": [],
-	"/activity": [],
-	"/manage": []
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/activity": [
+		"src/routes/+layout.ts"
+	],
+	"/manage": [
+		"src/routes/+layout.ts"
+	]
 }
