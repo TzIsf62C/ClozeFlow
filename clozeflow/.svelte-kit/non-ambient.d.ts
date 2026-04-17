@@ -40,6 +40,6 @@ declare module "$app/types" {
 		};
 		Pathname(): "/" | "/activity" | "/manage";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/.nojekyll" | "/favicon.png" | string & {};
+		Asset(): "/.nojekyll" | "/favicon.png" | "/samples/Chinese_Traditional.csv" | "/samples/English.csv" | string & {};
 	}
 }

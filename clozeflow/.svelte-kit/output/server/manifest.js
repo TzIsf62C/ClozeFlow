@@ -6,11 +6,11 @@ function __memo(fn) {
 
 return {
 	appDir: "_app",
-	appPath: "ClozeFlow/_app",
-	assets: new Set([".nojekyll","favicon.png"]),
-	mimeTypes: {".png":"image/png"},
+	appPath: "_app",
+	assets: new Set([".nojekyll","favicon.png","samples/Chinese_Traditional.csv","samples/English.csv"]),
+	mimeTypes: {".png":"image/png",".csv":"text/csv"},
 	_: {
-		client: {start:"_app/immutable/entry/start.QfZ9Cb6s.js",app:"_app/immutable/entry/app.BWxYfY8E.js",imports:["_app/immutable/entry/start.QfZ9Cb6s.js","_app/immutable/chunks/D76gbyXw.js","_app/immutable/chunks/CR0Ep_tM.js","_app/immutable/chunks/B5JE0GZ3.js","_app/immutable/chunks/BLNxhGaS.js","_app/immutable/entry/app.BWxYfY8E.js","_app/immutable/chunks/BLNxhGaS.js","_app/immutable/chunks/CR0Ep_tM.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.uapi_reG.js",app:"_app/immutable/entry/app.DnT8Q4nz.js",imports:["_app/immutable/entry/start.uapi_reG.js","_app/immutable/chunks/DZqFfQE0.js","_app/immutable/chunks/CQY3VV7G.js","_app/immutable/chunks/DuDm8rwf.js","_app/immutable/chunks/BtBuVhZ2.js","_app/immutable/entry/app.DnT8Q4nz.js","_app/immutable/chunks/BtBuVhZ2.js","_app/immutable/chunks/CQY3VV7G.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('./nodes/0.js')),
 			__memo(() => import('./nodes/1.js'))
@@ -21,7 +21,7 @@ return {
 		routes: [
 			
 		],
-		prerendered_routes: new Set(["/ClozeFlow/","/ClozeFlow/activity","/ClozeFlow/manage"]),
+		prerendered_routes: new Set(["/","/activity","/manage"]),
 		matchers: async () => {
 			
 			return {  };

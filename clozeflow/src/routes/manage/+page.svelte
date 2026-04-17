@@ -7,7 +7,7 @@
 
   // ── Tab state ─────────────────────────────────────────────────────────────
 
-  let activeTab: 'manual' | 'csv' = 'manual';
+  let activeTab: 'manual' | 'csv' | 'samples' = 'manual';
 
   // ── Word list ─────────────────────────────────────────────────────────────
 
@@ -179,6 +179,119 @@
     await db.history.where('wordId').equals(id).delete();
     await loadWords();
   }
+
+  // ── Samples ───────────────────────────────────────────────────────────────
+
+  // Vite glob: embeds each CSV's raw text content directly in the bundle at build time.
+  // This avoids any HTTP fetch at runtime and works identically in dev and production.
+  const sampleGlob = import.meta.glob('/static/samples/*.csv', { eager: true, query: '?raw', import: 'default' });
+
+  interface SampleFile {
+    name: string;       // display name, e.g. "Chinese Traditional"
+    content: string;    // raw CSV text embedded at build time
+    filename: string;   // e.g. "Chinese_Traditional.csv"
+  }
+
+  const sampleFiles: SampleFile[] = Object.entries(sampleGlob).map(([path, content]) => {
+    const filename = path.split('/').pop()!;
+    const name = filename.replace(/\.csv$/i, '').replace(/_/g, ' ');
+    return { name, content: content as string, filename };
+  });
+
+  // Tracks imported count per filename. -1 = unknown/loading.
+  let samplesStatus: Record<string, number> = {};
+  let samplesLoading: Record<string, boolean> = {};
+
+  interface CsvRow {
+    word?: string;
+    category?: string;
+    sentences?: string;
+  }
+
+  /** Parse a CSV string (already embedded via ?raw) and return the rows. */
+  function fetchSampleRows(content: string): CsvRow[] {
+    const result = Papa.parse<CsvRow>(content, {
+      header: true,
+      skipEmptyLines: true
+    });
+    return result.data;
+  }
+
+  /** Count how many rows from the sample CSV currently exist in the DB. */
+  async function countSampleInDb(rows: CsvRow[]): Promise<number> {
+    let count = 0;
+    for (const row of rows) {
+      const word = row.word?.trim();
+      const cat = row.category?.trim();
+      if (!word || !cat) continue;
+      const match = await db.words
+        .where('word').equals(word)
+        .filter((w) => w.gramCat === cat)
+        .first();
+      if (match) count++;
+    }
+    return count;
+  }
+
+  /** Refresh the imported-count for all sample files. */
+  async function refreshSamplesStatus() {
+    for (const sf of sampleFiles) {
+      samplesLoading = { ...samplesLoading, [sf.filename]: true };
+      const rows = fetchSampleRows(sf.content);
+      const count = await countSampleInDb(rows);
+      samplesStatus = { ...samplesStatus, [sf.filename]: count };
+      samplesLoading = { ...samplesLoading, [sf.filename]: false };
+    }
+  }
+
+  let samplesError = '';
+  let samplesSuccess = '';
+
+  /** Import a sample CSV into the DB. */
+  async function importSample(sf: SampleFile) {
+    samplesError = '';
+    samplesSuccess = '';
+    samplesLoading = { ...samplesLoading, [sf.filename]: true };
+    const rows = fetchSampleRows(sf.content);
+    await processCsvRows(rows);
+    const count = await countSampleInDb(rows);
+    samplesStatus = { ...samplesStatus, [sf.filename]: count };
+    samplesSuccess = `${sf.name} samples imported.`;
+    await loadWords();
+    await loadCats();
+    samplesLoading = { ...samplesLoading, [sf.filename]: false };
+  }
+
+  /** Delete all words that exactly match a sample CSV (word + gramCat). */
+  async function deleteSample(sf: SampleFile) {
+    samplesError = '';
+    samplesSuccess = '';
+    samplesLoading = { ...samplesLoading, [sf.filename]: true };
+    const rows = fetchSampleRows(sf.content);
+    for (const row of rows) {
+      const word = row.word?.trim();
+      const cat = row.category?.trim();
+      if (!word || !cat) continue;
+      const matches = await db.words
+        .where('word').equals(word)
+        .filter((w) => w.gramCat === cat)
+        .toArray();
+      for (const m of matches) {
+        await db.history.where('wordId').equals(m.id!).delete();
+        await db.words.delete(m.id!);
+      }
+    }
+    samplesStatus = { ...samplesStatus, [sf.filename]: 0 };
+    samplesSuccess = `${sf.name} samples deleted.`;
+    await loadWords();
+    await loadCats();
+    samplesLoading = { ...samplesLoading, [sf.filename]: false };
+  }
+
+  // Load samples status when tab becomes active.
+  $: if (activeTab === 'samples' && Object.keys(samplesStatus).length === 0) {
+    refreshSamplesStatus();
+  }
 </script>
 
 <svelte:head>
@@ -190,9 +303,9 @@
 
   <!-- Tabs -->
   <div class="mb-6 flex rounded-xl bg-gray-100 p-1">
-    {#each [{ id: 'manual', label: 'Manual Entry' }, { id: 'csv', label: 'CSV Upload' }] as tab}
+    {#each [{ id: 'manual', label: 'Manual Entry' }, { id: 'csv', label: 'CSV Upload' }, { id: 'samples', label: 'Samples' }] as tab}
       <button
-        on:click={() => (activeTab = tab.id as 'manual' | 'csv')}
+        on:click={() => (activeTab = tab.id as 'manual' | 'csv' | 'samples')}
         class="
           tap-target flex-1 rounded-lg py-2 text-sm font-semibold transition-all
           {activeTab === tab.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}
@@ -383,6 +496,61 @@
       {#if csvSuccess}
         <div class="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
           {csvSuccess}
+        </div>
+      {/if}
+    </div>
+  {/if}
+
+  <!-- ── SAMPLES ────────────────────────────────────────────────────────── -->
+  {#if activeTab === 'samples'}
+    <div in:fade={{ duration: 150 }} class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+      <p class="mb-1 text-sm text-gray-500">
+        Click a language to import sample words and sentences. Click again to remove them.
+      </p>
+
+      {#if sampleFiles.length === 0}
+        <div class="mt-6 rounded-xl border border-dashed border-gray-200 py-10 text-center text-sm text-gray-400">
+          No sample files found. Add CSV files to the <code class="font-mono">static/samples/</code> folder.
+        </div>
+      {:else}
+        <div class="mt-4 flex flex-wrap gap-3">
+          {#each sampleFiles as sf}
+            {@const count = samplesStatus[sf.filename] ?? -1}
+            {@const loading = samplesLoading[sf.filename] ?? false}
+            {@const imported = count > 0}
+            {#if imported}
+              <button
+                on:click={() => deleteSample(sf)}
+                disabled={loading}
+                class="tap-target rounded-xl border-2 border-red-200 bg-red-50 px-4 py-2 text-sm
+                       font-semibold text-red-700 transition-colors hover:border-red-400 hover:bg-red-100
+                       disabled:opacity-50"
+              >
+                {loading ? 'Working…' : `🗑️ ${count} ${sf.name}`}
+              </button>
+            {:else}
+              <button
+                on:click={() => importSample(sf)}
+                disabled={loading}
+                class="tap-target rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-2 text-sm
+                       font-semibold text-gray-700 transition-colors hover:border-blue-300 hover:bg-blue-50
+                       hover:text-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Working…' : `🌐 ${sf.name}`}
+              </button>
+            {/if}
+          {/each}
+        </div>
+      {/if}
+
+      {#if samplesError}
+        <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {samplesError}
+        </div>
+      {/if}
+      {#if samplesSuccess}
+        <div class="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          {samplesSuccess}
         </div>
       {/if}
     </div>

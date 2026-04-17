@@ -44,6 +44,10 @@
     isLoading = false;
   }
 
+  function handleBack() {
+    sessionStore.reset();
+  }
+
   // ── Blank answer helper ───────────────────────────────────────────────────
 
   function getBlankAnswer(sentence: SessionSentence): string {
@@ -108,8 +112,8 @@
 
   <!-- ── ACTIVE & GRADED PHASES ─────────────────────────────────────────── -->
   {#if $sessionStore.phase === 'active' || $sessionStore.phase === 'graded'}
-    <!-- Sentences -->
-    <div class="mb-6 space-y-3">
+    <!-- Sentences — extra bottom padding so content clears the fixed word bank -->
+    <div class="mb-4 space-y-3 {$sessionStore.phase === 'active' ? 'pb-52' : 'pb-4'}">
       {#each $sessionStore.sentences as sentence, idx}
         {@const answer = getBlankAnswer(sentence)}
         <div
@@ -156,44 +160,63 @@
       {/each}
     </div>
 
-    <!-- Word Bank -->
+    <!-- Word Bank — fixed to bottom of viewport so it stays visible while scrolling -->
     {#if $sessionStore.phase === 'active'}
-      <div class="mb-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
-        <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Word Bank</p>
-        <div class="flex flex-wrap gap-2">
-          {#each $sessionStore.wordBank as chip (chip.id)}
+      <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white px-4 pb-4 pt-3 shadow-lg">
+        <div class="mx-auto max-w-lg">
+          <!-- Back + Check row -->
+          <div class="mb-3 flex gap-3">
             <button
-              on:click={() => sessionStore.tapFromBank(chip.id)}
-              disabled={chip.isUsed}
-              in:fly={{ y: 20, duration: 250 }}
-              class="
-                tap-target rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-all
-                {chip.isUsed
-                  ? 'border-gray-200 bg-gray-100 text-gray-300 opacity-50'
-                  : 'border-blue-200 bg-blue-50 text-blue-800 hover:border-blue-400 hover:bg-blue-100 active:scale-95'}
-              "
+              on:click={handleBack}
+              class="tap-target flex items-center gap-1 rounded-xl border border-gray-200 bg-white px-4 py-3
+                     text-sm font-semibold text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
             >
-              {chip.text}
+              ← Back
             </button>
-          {/each}
+            <button
+              on:click={handleCheck}
+              disabled={!$allBlanksFilled || isLoading}
+              class="tap-target flex-1 rounded-xl bg-blue-600 py-3 text-base font-semibold text-white
+                     shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isLoading ? 'Checking…' : 'Check Answers'}
+            </button>
+          </div>
+          <!-- Chips -->
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">Word Bank</p>
+          <div class="flex flex-wrap gap-2">
+            {#each $sessionStore.wordBank as chip (chip.id)}
+              <button
+                on:click={() => sessionStore.tapFromBank(chip.id)}
+                disabled={chip.isUsed}
+                in:fly={{ y: 20, duration: 250 }}
+                class="
+                  tap-target rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-all
+                  {chip.isUsed
+                    ? 'border-gray-200 bg-gray-100 text-gray-300 opacity-50'
+                    : 'border-blue-200 bg-blue-50 text-blue-800 hover:border-blue-400 hover:bg-blue-100 active:scale-95'}
+                "
+              >
+                {chip.text}
+              </button>
+            {/each}
+          </div>
         </div>
       </div>
     {/if}
 
-    <!-- Action buttons -->
+    <!-- Action buttons — graded phase only -->
     <div class="mb-8 flex gap-3">
-      {#if $sessionStore.phase === 'active'}
-        <button
-          on:click={handleCheck}
-          disabled={!$allBlanksFilled || isLoading}
-          class="tap-target flex-1 rounded-xl bg-blue-600 py-3 text-base font-semibold text-white
-                 shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {isLoading ? 'Checking…' : 'Check Answers'}
-        </button>
-      {/if}
-
       {#if $sessionStore.phase === 'graded'}
+        <!-- Back button -->
+        <button
+          on:click={handleBack}
+          class="tap-target flex items-center gap-1 rounded-xl border border-gray-200 bg-white px-4 py-3
+                 text-sm font-semibold text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
+        >
+          ← Back
+        </button>
+
         <!-- Score summary -->
         {@const correct = $sessionStore.sentences.filter((s) => s.gradeResult === 'correct').length}
         {@const total = $sessionStore.sentences.length}
@@ -206,10 +229,10 @@
         <button
           on:click={handleNext}
           disabled={isLoading}
-          class="tap-target flex-1 rounded-xl bg-blue-600 py-3 text-base font-semibold text-white
+          class="tap-target flex items-center gap-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white
                  shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-40"
         >
-          {isLoading ? 'Loading…' : 'Next Session →'}
+          {isLoading ? 'Loading…' : 'Next →'}
         </button>
       {/if}
     </div>

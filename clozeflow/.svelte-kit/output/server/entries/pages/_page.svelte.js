@@ -1,7 +1,7 @@
 import "clsx";
 import { g as goto } from "../../chunks/client.js";
 import { b as base } from "../../chunks/server.js";
-import "../../chunks/url.js";
+import "../../chunks/index.js";
 import "@sveltejs/kit/internal/server";
 import "../../chunks/root.js";
 function _page($$renderer, $$props) {
