@@ -1,0 +1,1 @@
+import{p as t,a}from"../chunks/CQY3VV7G.js";import{i as p}from"../chunks/BP_g8XuY.js";import{g as r}from"../chunks/DAUCvcrX.js";import{b as i}from"../chunks/DuDm8rwf.js";import"../chunks/BtBuVhZ2.js";function g(m,o){t(o,!1),r(`${i}/activity`,{replaceState:!0}),p(),a()}export{g as component};

@@ -382,12 +382,16 @@
           <legend class="mb-1 block text-sm font-medium text-gray-700">
             Example Sentences
           </legend>
+          <p class="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Wrap the target word (or its contextual form) in <strong>parentheses</strong> to mark the blank.
+            <span class="font-mono">She finally (achieved) her goal.</span>
+          </p>
           <div class="space-y-2">
             {#each manualSentences as _, idx}
               <div class="flex gap-2">
                 <textarea
                   bind:value={manualSentences[idx]}
-                  placeholder="Type a sentence using the word…"
+                  placeholder="e.g. She finally (achieved) her goal after months of training."
                   rows="2"
                   class="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2
                          text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -445,8 +449,8 @@
       <div class="mb-4 rounded-xl bg-blue-50 p-4 text-sm text-blue-800">
         <p class="font-semibold">CSV Format</p>
         <p class="mt-1 font-mono text-xs">word,category,sentences</p>
-        <p class="mt-0.5 font-mono text-xs">run,Verb,She runs every day.|He ran fast.</p>
-        <p class="mt-2 text-xs text-blue-600">Use <strong>|</strong> to separate multiple sentences.</p>
+        <p class="mt-0.5 font-mono text-xs">run,Verb,She (runs) every day.|He (ran) fast.</p>
+        <p class="mt-2 text-xs text-blue-600">Use <strong>|</strong> to separate multiple sentences. Wrap the target word (or its contextual form) in <strong>(parentheses)</strong> to mark the blank.</p>
       </div>
 
       <!-- Drop zone -->

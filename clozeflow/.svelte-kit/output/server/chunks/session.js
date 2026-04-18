@@ -7,16 +7,25 @@ function shuffle(arr) {
   }
   return arr;
 }
-function maskSentence(word, sentence) {
-  const idx = sentence.toLowerCase().indexOf(word.toLowerCase());
-  if (idx === -1) return null;
+function maskSentence(sentence) {
+  const match = /\(([^)]+)\)/.exec(sentence);
+  if (!match) return null;
+  const start = match.index;
+  const answer = match[1];
+  const end = start + match[0].length;
   const parts = [];
-  if (idx > 0) parts.push({ type: "text", content: sentence.slice(0, idx) });
-  parts.push({ type: "blank", answer: sentence.slice(idx, idx + word.length) });
-  if (idx + word.length < sentence.length) {
-    parts.push({ type: "text", content: sentence.slice(idx + word.length) });
-  }
+  if (start > 0) parts.push({ type: "text", content: sentence.slice(0, start) });
+  parts.push({ type: "blank", answer });
+  if (end < sentence.length) parts.push({ type: "text", content: sentence.slice(end) });
   return parts;
+}
+function getContextualForm(word) {
+  const shuffled = shuffle([...word.sentences]);
+  for (const s of shuffled) {
+    const match = /\(([^)]+)\)/.exec(s);
+    if (match) return match[1];
+  }
+  return word.word;
 }
 function scoreSentence(hash, historyMap) {
   const record = historyMap.get(hash);
@@ -51,7 +60,7 @@ async function selectSentences(gramCat) {
       const record = historyMap.get(hash);
       const lastReviewed = record?.lastReviewed ?? 0;
       const dayBucket = Math.floor(lastReviewed / 864e5);
-      if (maskSentence(word.word, text) !== null) {
+      if (maskSentence(text) !== null) {
         byPriority[priority].push({ text, hash, priority, dayBucket, lastReviewed });
       }
     }
@@ -115,7 +124,7 @@ async function selectSentences(gramCat) {
     const candidates = shuffle([...sw.eligibleSentences]);
     let chosen = null;
     for (const c of candidates) {
-      const parts = maskSentence(sw.word.word, c.text);
+      const parts = maskSentence(c.text);
       if (parts) {
         chosen = {
           wordId: sw.word.id,
@@ -136,15 +145,19 @@ async function selectSentences(gramCat) {
   shuffle(distractor_pool);
   const distractors = distractor_pool.slice(0, 2);
   const bankItems = shuffle([
-    ...sessionWords.map((s) => ({
-      id: String(s.wordId),
-      text: s.word,
-      isDistractor: false,
-      isUsed: false
-    })),
+    ...sessionWords.map((s) => {
+      const blankPart = s.parts.find((p) => p.type === "blank");
+      const contextForm = blankPart && blankPart.type === "blank" ? blankPart.answer : s.word;
+      return {
+        id: String(s.wordId),
+        text: contextForm,
+        isDistractor: false,
+        isUsed: false
+      };
+    }),
     ...distractors.map((d) => ({
       id: `dist-${d.id}`,
-      text: d.word,
+      text: getContextualForm(d),
       isDistractor: true,
       isUsed: false
     }))

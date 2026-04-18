@@ -45,20 +45,37 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /**
- * Mask the first case-insensitive occurrence of `word` inside `sentence`.
- * Returns null if the word is not found (caller skips to next sentence).
+ * Find the first parenthesised word marker in `sentence`, e.g. "(achieved)" or "(勇氣)".
+ * Splits the sentence into SentenceParts with the marker replaced by a blank.
+ * Returns null if no marker is found — the sentence will be skipped.
  */
-function maskSentence(word: string, sentence: string): SentencePart[] | null {
-  const idx = sentence.toLowerCase().indexOf(word.toLowerCase());
-  if (idx === -1) return null;
+function maskSentence(sentence: string): SentencePart[] | null {
+  const match = /\(([^)]+)\)/.exec(sentence);
+  if (!match) return null;
+
+  const start = match.index;
+  const answer = match[1];           // content inside parens — the contextual form
+  const end = start + match[0].length;
 
   const parts: SentencePart[] = [];
-  if (idx > 0) parts.push({ type: 'text', content: sentence.slice(0, idx) });
-  parts.push({ type: 'blank', answer: sentence.slice(idx, idx + word.length) });
-  if (idx + word.length < sentence.length) {
-    parts.push({ type: 'text', content: sentence.slice(idx + word.length) });
-  }
+  if (start > 0) parts.push({ type: 'text', content: sentence.slice(0, start) });
+  parts.push({ type: 'blank', answer });
+  if (end < sentence.length) parts.push({ type: 'text', content: sentence.slice(end) });
   return parts;
+}
+
+/**
+ * Extract a contextual (inflected/in-sentence) form for a word by reading
+ * the parenthesised marker from a randomly-chosen sentence.
+ * Falls back to the base word string if no marker is found.
+ */
+function getContextualForm(word: Word): string {
+  const shuffled = shuffle([...word.sentences]);
+  for (const s of shuffled) {
+    const match = /\(([^)]+)\)/.exec(s);
+    if (match) return match[1];
+  }
+  return word.word;
 }
 
 /**
@@ -137,8 +154,8 @@ export async function selectSentences(
       const lastReviewed = record?.lastReviewed ?? 0;
       const dayBucket = Math.floor(lastReviewed / 86_400_000);
 
-      // Only include this sentence if it can actually be masked.
-      if (maskSentence(word.word, text) !== null) {
+      // Only include this sentence if it has a parenthesised marker.
+      if (maskSentence(text) !== null) {
         byPriority[priority].push({ text, hash, priority, dayBucket, lastReviewed });
       }
     }
@@ -227,7 +244,7 @@ export async function selectSentences(
     const candidates = shuffle([...sw.eligibleSentences]);
     let chosen: SessionWord | null = null;
     for (const c of candidates) {
-      const parts = maskSentence(sw.word.word, c.text);
+      const parts = maskSentence(c.text);
       if (parts) {
         chosen = {
           wordId: sw.word.id!,
@@ -254,16 +271,22 @@ export async function selectSentences(
   const distractors = distractor_pool.slice(0, 2);
 
   // 8. Build + shuffle bank items.
+  // Correct-answer chips use the contextual form (content inside parens).
+  // Distractor chips also use a contextual form drawn from one of their sentences.
   const bankItems: BankItem[] = shuffle([
-    ...sessionWords.map((s) => ({
-      id: String(s.wordId),
-      text: s.word,
-      isDistractor: false,
-      isUsed: false
-    })),
+    ...sessionWords.map((s) => {
+      const blankPart = s.parts.find((p) => p.type === 'blank');
+      const contextForm = blankPart && blankPart.type === 'blank' ? blankPart.answer : s.word;
+      return {
+        id: String(s.wordId),
+        text: contextForm,
+        isDistractor: false,
+        isUsed: false
+      };
+    }),
     ...distractors.map((d) => ({
       id: `dist-${d.id!}`,
-      text: d.word,
+      text: getContextualForm(d),
       isDistractor: true,
       isUsed: false
     }))
